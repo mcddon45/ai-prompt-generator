@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .module {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .description {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 10px 0 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        textarea {
+            height: 200px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Prompt Generator for Perchance & Flux</h1>
+        <div id="modules"></div>
+        <button onclick="generatePrompt()">Generate Prompt</button>
+        <button onclick="clearSelections()">Clear Selections</button>
+        <div class="module">
+            <label>Generated Prompt</label>
+            <textarea id="promptOutput" readonly></textarea>
+        </div>
+    </div>
+    <script>
+        const modules = {
+            Gender: {
+                options: [
+                    { value: "Female", description: "Natural anatomy, like a woman in her 20s" }
+                ]
+            },
+            Ethnicity: {
+                options: [
+                    { value: "Northern European", description: "Fair skin, often burns easily, like Scandinavian or Germanic" },
+                    { value: "Mediterranean", description: "Olive tone, tans well, like Italian or Greek" },
+                    { value: "Eastern European", description: "Pale with pink or cool undertones, like Slavic or Polish" },
+                    { value: "Celtic", description: "Very fair with freckles, burns easily, like Irish or Scottish" },
+                    { value: "American", description: "Fair to medium skin, often mixed European heritage, may tan due to lifestyle" }
+                ]
+            },
+            SkinTone: {
+                options: [
+                    { value: "Porcelain", description: "Pale, translucent white, almost no melanin, burns easily" },
+                    { value: "Alabaster", description: "Extremely fair, cool-toned, like Nordic, minimal tanning" },
+                    { value: "Freckled Fair", description: "Fair skin with moderate brown freckles, often Celtic or American" },
+                    { value: "Golden Tan", description: "Medium golden-brown tan, deepens with sun" },
+                    { value: "Spray Tan", description: "Artificial golden-orange tan, popular in U.S. beauty culture" }
+                ]
+            },
+            BodyType: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Athletic Slim", description: "Lean muscle, like fitness" },
+                    { value: "Petite Frame", description: "Small, like 4'11\"-5'3\"" },
+                    { value: "Curvy Hourglass", description: "Classic curves, like 36-24-36" },
+                    { value: "Tall and Lanky", description: "Tall and thin, like 5'9\"+" }
+                ]
+            },
+            FacialExpression: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Amused", description: "Light smile, sparkling eyes. Mild entertainment" },
+                    { value: "Confident", description: "Slight smile, direct gaze. Poise" },
+                    { value: "Flirtatious", description: "Prolonged eye contact. Playful invitation" },
+                    { value: "Seductive", description: "Bitten lips, raised brows. Sexual desire" }
+                ]
+            },
+            GazeDirection: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "At Camera", description: "Direct eye contact with viewer" },
+                    { value: "Downcast", description: "Looking downward, like shy or introspective" },
+                    { value: "Side Glance", description: "Glancing sideways, like suspicious or flirtatious" },
+                    { value: "Post-Orgasm", description: "Distant, unfocused stare" }
+                ]
+            },
+            Eyebrows: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Arched", description: "High, curved. Dramatic" },
+                    { value: "Straight", description: "Flat, linear. Natural" },
+                    { value: "Thick", description: "Bold, bushy" },
+                    { value: "Razor-Thin", description: "Over-groomed. Minimal" }
+                ]
+            },
+            LipType: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Plump", description: "Naturally voluminous" },
+                    { value: "Thin", description: "Narrow volume" },
+                    { value: "Bowed", description: "Defined Cupid’s bow" },
+                    { value: "Lip Gloss – Shiny", description: "Reflective, sticky finish" }
+                ]
+            },
+            HairStyle: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Long Straight", description: "Hair falling straight past shoulders" },
+                    { value: "Short Bob", description: "Chin-length blunt cut" },
+                    { value: "Curly Afro", description: "Tight, voluminous curls" },
+                    { value: "Ponytail", description: "Hair tied back into a tail" }
+                ]
+            },
+            HairColor: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Jet Black", description: "Intense, inky black hair" },
+                    { value: "Dark Brown", description: "Rich, deep brown shade" },
+                    { value: "Blonde", description: "Golden or light-colored hair" },
+                    { value: "Pastel Pink", description: "Soft pink strands" }
+                ]
+            },
+            EyeMakeup: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Natural", description: "Neutral tones" },
+                    { value: "Smoky", description: "Dark, sultry shadow" },
+                    { value: "Winged", description: "Sharp eyeliner wing" },
+                    { value: "Glitter", description: "Sparkly effect" }
+                ]
+            },
+            LipMakeup: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Nude", description: "Sheer, natural" },
+                    { value: "Bold Red", description: "Vibrant, classic" },
+                    { value: "Matte", description: "Flat finish" },
+                    { value: "Lip Gloss – Post-Kiss", description: "Wet, messy finish" }
+                ]
+            },
+            BreastSize: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Small", description: "Minimal volume, like petite frame" },
+                    { value: "Medium", description: "Natural average, like athletic build" },
+                    { value: "Large", description: "Significant fullness, like D+" },
+                    { value: "Very Large", description: "Extreme augmentation, like F+" }
+                ]
+            },
+            NippleSize: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Small", description: "Subtle projection, like petite frame" },
+                    { value: "Medium", description: "Natural average, like adult female" },
+                    { value: "Large", description: "Prominent, like post-lactation" },
+                    { value: "Post-Climax Swelling", description: "Temporary puffiness" }
+                ]
+            },
+            AreolaSize: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Small", description: "Narrow, like teenage" },
+                    { value: "Medium", description: "Natural average, like adult" },
+                    { value: "Large", description: "Broad pigmented area" },
+                    { value: "Post-Climax Redness", description: "Engorged appearance" }
+                ]
+            },
+            BreastPostClimax: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Semen Residue – Surface", description: "Glossy coating on breast" },
+                    { value: "Semen Drip – Down Breast", description: "Streak down cleavage" },
+                    { value: "Semen & Sweat Mix", description: "Moist, post-exertion" },
+                    { value: "Post-Climax Semen Spread", description: "Full-breast coverage" }
+                ]
+            },
+            AbdomenSize: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Flat", description: "Toned, minimal fat" },
+                    { value: "Toned", description: "Defined muscles, like athletic" },
+                    { value: "Soft Belly", description: "Slight protrusion, like relaxed" },
+                    { value: "Post-Climax Belly Sweat", description: "Moisture from exertion" }
+                ]
+            },
+            LegSize: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Slim", description: "Narrow structure, like petite frame" },
+                    { value: "Athletic", description: "Sculpted, like runner’s build" },
+                    { value: "Muscular", description: "Defined hamstrings or quads" },
+                    { value: "Post-Climax Sweat", description: "Moisture from exertion" }
+                ]
+            },
+            ArmSize: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Slim", description: "Narrow, like petite frame" },
+                    { value: "Athletic", description: "Sculpted, like runner’s build" },
+                    { value: "Muscular", description: "Defined biceps/triceps" },
+                    { value: "Post-Climax Residue", description: "Glossy coating" }
+                ]
+            },
+            VaginalOpening: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Tight", description: "Narrow, closed appearance" },
+                    { value: "Relaxed", description: "Open, like post-urination" },
+                    { value: "Post-Childbirth Opening", description: "Torn or stretched" },
+                    { value: "Vulva Swelling – Post-Climax", description: "Temporary puffiness" }
+                ]
+            },
+            AnusSize: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Tight", description: "Minimal opening, like virgin state" },
+                    { value: "Relaxed", description: "Open, like post-bowel movement" },
+                    { value: "Gaping – Mild", description: "Slight dilation, like post-penetration" },
+                    { value: "Post-Anal Fixation Swelling", description: "Temporary engorgement" }
+                ]
+            },
+            PostureStanding: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Upright Neutral", description: "Spine-aligned, balanced" },
+                    { value: "Upright – Breast Thrust", description: "Chest forward, seductive" },
+                    { value: "Hip Cocked Sharply", description: "One leg forward, slight angle" },
+                    { value: "Leaning Forward At Waist", description: "Gaze up, subtle eye contact" }
+                ]
+            },
+            PostClimaxPhysical: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Vulva Swelling – Mild", description: "Slight puffiness" },
+                    { value: "Anal Swelling – Mild", description: "Slight puffiness" },
+                    { value: "Semen Residue – Surface", description: "Glossy coating" },
+                    { value: "Post-Climax Drip", description: "Moisture trail" }
+                ]
+            },
+            PostClimaxEmotional: {
+                options: [
+                    { value: "None", description: "" },
+                    { value: "Post-Climax Daze", description: "Unfocused expression" },
+                    { value: "Post-Climax Satisfaction", description: "Relaxed, smug demeanor" },
+                    { value: "Post-Climax Fatigue", description: "Tired, heavy-lidded" },
+                    { value: "Post-Climax Afterglow", description: "Radiant, fulfilled" }
+                ]
+            }
+        };
+
+        function renderModules() {
+            const modulesDiv = document.getElementById('modules');
+            Object.entries(modules).forEach(([moduleName, module]) => {
+                const div = document.createElement('div');
+                div.className = 'module';
+                div.innerHTML = `
+                    <label>${moduleName}</label>
+                    <select id="${moduleName}" onchange="updateDescription('${moduleName}')">
+                        ${module.options.map(option => `<option value="${option.value}">${option.value}</option>`).join('')}
+                    </select>
+                    <p class="description" id="${moduleName}_description">${module.options[0].description}</p>
+                `;
+                modulesDiv.appendChild(div);
+            });
+        }
+
+        function updateDescription(moduleName) {
+            const select = document.getElementById(moduleName);
+            const description = document.getElementById(`${moduleName}_description`);
+            const selectedOption = modules[moduleName].options.find(opt => opt.value === select.value);
+            description.textContent = selectedOption.description;
+        }
+
+        function generatePrompt() {
+            const promptParts = [];
+            Object.keys(modules).forEach(moduleName => {
+                const select = document.getElementById(moduleName);
+                const value = select.value;
+                if (value !== "None") {
+                    const option = modules[moduleName].options.find(opt => opt.value === value);
+                    promptParts.push(`${moduleName}: ${value} (${option.description})`);
+                }
+            });
+            const promptText = `A detailed depiction of a female character with the following characteristics: ${promptParts.join(", ")}.`;
+            document.getElementById('promptOutput').value = promptText;
+        }
+
+        function clearSelections() {
+            Object.keys(modules).forEach(moduleName => {
+                const select = document.getElementById(moduleName);
+                select.value = modules[moduleName].options[0].value;
+                updateDescription(moduleName);
+            });
+            document.getElementById('promptOutput').value = "";
+        }
+
+        // Initialize
+        renderModules();
+    </script>
+</body>
+</html>
